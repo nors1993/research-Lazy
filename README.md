@@ -10,7 +10,7 @@
 
 ## Overview
 
-![alt text](image-1.png)
+![alt text](image.png)
 
 AutoResearch Agent System is a Python 3.11+ FastAPI web application that coordinates a team of specialized AI agents — Editor, Investigator, Writer, and Reviewer — to autonomously conduct research and compose structured documents. The system supports configurable workflows (paper and patent), real-time SSE progress streaming, checkpoint-based pause/resume, template injection, and multiple LLM backends (OpenAI, Anthropic, Azure, Ollama, and any OpenAI-compatible provider).
 

@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoResearch 智能研究助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 90vh;
+            background: #1a1a1a;
+            border-radius: 16px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        /* Main content area (left side) */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            border-right: 1px solid #333;
+        }
+        
+        /* Right side dashboard panel */
+        .dashboard-panel {
+            width: 380px;
+            background: #151515;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .dashboard-header {
+            padding: 16px 20px;
+            background: #1f1f1f;
+            border-bottom: 1px solid #333;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dashboard-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .dashboard-empty {
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .dashboard-node {
+            background: #1e1e1e;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+        }
+        
+        .dashboard-node.active {
+            border-color: #5c9ece;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        
+        .dashboard-node.completed {
+            border-color: #1a5;
+        }
+        
+        .dashboard-node-header {
+            padding: 12px 14px;
+            background: #252525;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .dashboard-node-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3a3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .dashboard-node.active .dashboard-node-icon {
+            background: linear-gradient(135deg, #5c9ece 0%, #7ec8a3 100%);
+        }
+        
+        .dashboard-node.completed .dashboard-node-icon {
+            background: #1a5;
+        }
+        
+        .dashboard-node-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #aaa;
+            flex: 1;
+        }
+        
+        .dashboard-node.active .dashboard-node-title {
+            color: #fff;
+        }
+        
+        .dashboard-node.completed .dashboard-node-title {
+            color: #1a5;
+        }
+        
+        .dashboard-node-status {
+            font-size: 11px;
+            color: #666;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #333;
+        }
+        
+        .dashboard-node.active .dashboard-node-status {
+            background: linear-gradient(135deg, #5c9ece 0%, #7ec8a3 100%);
+            color: #0a192f;
+        }
+        
+        .dashboard-node.completed .dashboard-node-status {
+            background: #1a5;
+            color: #fff;
+        }
+        
+        .dashboard-node-body {
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.6;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .dashboard-node-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .dashboard-node-body::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        
+        .dashboard-node-body::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 2px;
+        }
+        
+        .dashboard-log-section {
+            margin-top: 12px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .dashboard-log-header {
+            padding: 10px 14px;
+            background: #252525;
+            font-size: 12px;
+            font-weight: 600;
+            color: #aaa;
+            border-bottom: 1px solid #2a2a2a;
+            flex-shrink: 0;
+        }
+        
+        .dashboard-log-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #888;
+            line-height: 1.6;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        
+        .dashboard-log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .dashboard-log-container::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        
+        .dashboard-log-container::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+        
+        .dashboard-log-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        
+        .dashboard-log-line:last-child {
+            border-bottom: none;
+        }
+        
+.header {
+            padding: 20px;
+            background: linear-gradient(135deg, #1a2332 0%, #1e2a3a 50%, #243040 100%);
+            border-bottom: 1px solid rgba(92, 158, 206, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .status {
+            margin-left: auto;
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        .message.bot .avatar {
+            background: linear-gradient(135deg, #0a192f 0%, #0d2137 50%, #5c9ece 100%);
+            border: 1px solid rgba(92, 158, 206, 0.3);
+        }
+        
+        .message.user .avatar {
+            background: #4a4a4a;
+        }
+        
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .message.bot .message-content {
+            background: #2a2a2a;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.user .message-content {
+            background: #3a4a5c;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #2a2a2a;
+            border-radius: 16px;
+            width: fit-content;
+        }
+        
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #5c9ece 0%, #7ec8a3 100%);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        
+        .progress-area {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 8px 0;
+            position: relative;
+        }
+        
+        .progress-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .workflow-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 10px 0;
+            overflow-x: auto;
+            gap: 4px;
+        }
+        
+        .workflow-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+            position: relative;
+        }
+        
+        .workflow-node-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #3a3a3a;
+            border: 3px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        
+        .workflow-node.active .workflow-node-circle {
+            background: linear-gradient(135deg, #5c9ece 0%, #7ec8a3 100%);
+            border-color: #5c9ece;
+            color: #0a192f;
+            box-shadow: 0 0 20px rgba(92, 158, 206, 0.3);
+            transform: scale(1.15);
+        }
+        
+        .workflow-node.completed .workflow-node-circle {
+            background: #1a5;
+            border-color: #1a5;
+            color: #fff;
+        }
+        
+        .workflow-node-label {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            max-width: 80px;
+            line-height: 1.3;
+        }
+        
+        .workflow-node.active .workflow-node-label {
+            color: #5c9ece;
+            font-weight: 600;
+        }
+        
+        .workflow-node.completed .workflow-node-label {
+            color: #1a5;
+        }
+        
+        .workflow-connector {
+            flex: 1;
+            height: 3px;
+            background: #444;
+            margin-top: 20px;
+            min-width: 20px;
+            position: relative;
+        }
+        
+        .workflow-connector.completed {
+            background: linear-gradient(90deg, #5c9ece, #7ec8a3);
+        }
+        
+        .node-details {
+            margin-top: 16px;
+            padding: 12px;
+            background: #222;
+            border-radius: 8px;
+            border-left: 3px solid #5c9ece;
+            font-size: 12px;
+            color: #aaa;
+            max-height: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .node-details::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(transparent, #222);
+        }
+        
+        .detail-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 0;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .detail-icon {
+            color: #5c9ece;
+            font-size: 10px;
+        }
+        
+        .detail-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(92, 158, 206, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(92, 158, 206, 0.5); }
+        }
+        
+        .progress-step {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: #3a3a3a;
+            color: #666;
+        }
+        
+        .progress-step.active {
+            background: linear-gradient(135deg, #5c9ece 0%, #7ec8a3 100%);
+            color: #0a192f;
+        }
+        
+        .progress-step.completed {
+            background: #1a5;
+            color: #fff;
+        }
+        
+        .input-area {
+            padding: 16px;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #333;
+            border-radius: 24px;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-area input:focus {
+            border-color: #5c9ece;
+        }
+        
+        .input-area input::placeholder {
+            color: #666;
+        }
+        
+         .input-area button {
+             width: 48px;
+             height: 48px;
+             background: #243040;
+             border: 1px solid #5c9ece;
+             border-radius: 50%;
+             color: #fff;
+             font-size: 20px;
+             cursor: pointer;
+             transition: all 0.3s ease;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             flex-shrink: 0;
+             position: relative;
+             overflow: hidden;
+         }
+         
+         .input-area button:hover {
+             transform: scale(1.1);
+             box-shadow: 0 0 15px rgba(92, 158, 206, 0.4);
+         }
+         
+         .input-area button:disabled {
+             opacity: 0.5;
+             cursor: not-allowed;
+         }
+         
+         /* New SVG icon button styles */
+         .input-area button svg {
+             width: 20px;
+             height: 20px;
+             fill: white;
+             transition: transform 0.3s ease;
+         }
+         
+         .input-area button .icon-send {
+             /* default icon */
+         }
+         
+         .input-area button .icon-cancel {
+             /* cancel icon - shown during task */
+         }
+         
+         .input-area button.cancelling .icon-send {
+             display: none;
+         }
+         
+         .input-area button:not(.cancelling) .icon-cancel {
+             display: none;
+         }
+         
+         /* Cancel button style */
+         .input-area button.cancelling {
+             background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+             animation: pulse-cancel 1s infinite;
+         }
+        
+        @keyframes pulse-cancel {
+            0%, 100% { box-shadow: 0 0 10px rgba(244, 67, 54, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(244, 67, 54, 0.8); }
+        }
+        
+        /* New task button style */
+        .input-area .new-task-btn {
+            width: 48px;
+            height: 48px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .input-area .new-task-btn:hover:not(:disabled) {
+            background: #3a3a3a;
+            border-color: #5c9ece;
+        }
+
+        .input-area .new-task-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .input-area .new-task-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #aaa;
+        }
+
+        /* Upload template button style */
+        .input-area .upload-btn {
+            width: 48px;
+            height: 48px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .input-area .upload-btn:hover {
+            background: #3a3a3a;
+            border-color: #5c9ece;
+        }
+
+        .input-area .upload-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #aaa;
+        }
+
+        /* Hidden file input */
+        #templateInput {
+            display: none;
+        }
+
+        /* Upload button style */
+        .input-area input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .suggestions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 0 16px 12px;
+        }
+        
+        .suggestion {
+            padding: 6px 14px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .suggestion:hover {
+            background: #3a3a3a;
+            border-color: #5c9ece;
+        }
+        
+        .suggestion.selected {
+            background: linear-gradient(135deg, #5c9ece 0%, #7ec8a3 100%);
+            border-color: #5c9ece;
+            color: #fff;
+        }
+
+        .suggestion.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .settings-btn {
+            margin-left: auto;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .settings-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Settings Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .modal-header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .modal-close:hover {
+            color: #fff;
+        }
+        
+        .settings-section {
+            margin-bottom: 24px;
+        }
+        
+        .settings-section h3 {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #5c9ece;
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 12px;
+            background: #3a3a3a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+        
+        .save-btn:hover {
+            background: #4a4a4a;
+            border-color: #5c9ece;
+        }
+        
+        /* Model dropdown */
+        .form-group select {
+            flex: 1;
+            padding: 10px 12px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px 0 0 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .form-group select:focus {
+            outline: none;
+            border-color: #5c9ece;
+        }
+        
+        .form-group select option {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        
+        .model-select-wrapper {
+            display: flex;
+            gap: 0;
+        }
+        
+        .model-select-wrapper select {
+            border-radius: 8px 0 0 8px;
+        }
+        
+        .refresh-btn {
+            padding: 10px 12px;
+            background: #3a3a3a;
+            border: 1px solid #333;
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            color: #888;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #4a4a4a;
+            color: #fff;
+        }
+        
+        /* Test connection button */
+        .test-connection {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .test-btn {
+            padding: 8px 16px;
+            background: #3a3a3a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .test-btn:hover {
+            background: #4a4a4a;
+            border-color: #5c9ece;
+        }
+        
+        .test-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #444;
+        }
+        
+        .status-indicator.success {
+            background: #4caf50;
+            box-shadow: 0 0 8px #4caf50;
+        }
+        
+        .status-indicator.warning {
+            background: #ff9800;
+            box-shadow: 0 0 8px #ff9800;
+        }
+        
+        .status-indicator.error {
+            background: #f44336;
+            box-shadow: 0 0 8px #f44336;
+        }
+        
+        .status-indicator.ready {
+            background: #2196f3;
+            box-shadow: 0 0 8px #2196f3;
+        }
+        
+        .status-text {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <span style="font-size: 24px;">🥷</span>
+                <h1>AutoResearch 智能研究助手</h1>
+                <span class="status" id="status">连接中...</span>
+                <button class="settings-btn" onclick="console.log('Settings button clicked'); showSettings()">⚙️ 设置</button>
+            </div>
+            
+            <div class="chat-area" id="chatArea">
+                <div class="message bot">
+                    <div class="avatar">🥷</div>
+                    <div class="message-content">
+                        请点击下方的「学术论文」或「专利申请」按钮开始您的研究任务。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="suggestions" id="suggestions">
+                <div class="suggestion" onclick="selectDocType('PAPER', '我想写一篇关于人工智能在医疗诊断中的应用的学术论文')">📄 学术论文</div>
+                <div class="suggestion" onclick="selectDocType('PATENT', '帮我写一个基于深度学习的手势识别专利')">📝 专利申请</div>
+            </div>
+            
+<div class="input-area">
+                  <input type="text" id="messageInput" placeholder="输入你的研究需求..." onkeypress="handleKeyPress(event)">
+                  <button class="new-task-btn" id="newTaskBtn" onclick="startNewTask()" title="新建会话">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                      </svg>
+                  </button>
+                  <button class="upload-btn" id="uploadBtn" onclick="document.getElementById('templateInput').click()" title="上传模板文档">
+                     <svg viewBox="0 0 24 24">
+                         <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+                     </svg>
+                 </button>
+                 <input type="file" id="templateInput" accept=".docx,.pdf,.md,.doc" onchange="handleFileSelect(event)">
+                 <button id="sendBtn" onclick="handleSendClick()" title="发送任务">
+                     <svg class="icon-send" viewBox="0 0 24 24" width="20" height="20">
+                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white"/>
+                     </svg>
+                     <svg class="icon-cancel" viewBox="0 0 24 24" width="20" height="20" style="display:none">
+                         <rect x="4" y="4" width="16" height="16" rx="2" fill="white"/>
+                     </svg>
+                 </button>
+             </div>
+        </div>
+        
+        <!-- Right side dashboard panel -->
+        <div class="dashboard-panel">
+            <div class="dashboard-header">
+                <span>📊</span> 实时工作流看板
+            </div>
+            <div class="dashboard-content" id="dashboardContent">
+                <div class="dashboard-empty">
+                    开始研究任务后，<br>这里将实时显示每个节点的模型输出
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>⚙️ 设置</h2>
+                <button class="modal-close" onclick="closeSettings()">×</button>
+            </div>
+            
+            <div class="settings-section">
+                <h3>📁 文档保存路径</h3>
+                <div class="form-group">
+                    <label>输出目录</label>
+                    <input type="text" id="outputPath" placeholder="workspace/output">
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>🥷 模型配置</h3>
+                <div class="form-group">
+                    <label>API Base URL</label>
+                    <input type="text" id="modelBaseUrl" placeholder="https://api.example.com/v1" oninput="onApiSettingsChange()">
+                </div>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="password" id="modelApiKey" placeholder="请输入API Key" oninput="onApiSettingsChange()">
+                </div>
+                <div class="form-group">
+                    <label>模型名称 <span style="font-size:10px;color:#666">(点击获取可用模型)</span></label>
+                    <div class="model-select-wrapper">
+                        <select id="modelName" onchange="onModelSelectChange()">
+                            <option value="">-- 选择模型 --</option>
+                        </select>
+                        <button class="refresh-btn" onclick="refreshModels()" title="刷新模型列表">🔄</button>
+                    </div>
+                </div>
+                <div class="form-group test-connection">
+                    <button class="test-btn" onclick="testConnection()">🔌 测试连接</button>
+                    <span id="connectionStatus" class="status-indicator"></span>
+                </div>
+            </div>
+            
+            <button class="save-btn" onclick="saveSettings()">保存设置</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局错误处理
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('JavaScript Error:', msg, 'Line:', line);
+            document.getElementById('status').textContent = '⚠️ 前端错误';
+            return true;
+        };
+        
+        const API_BASE = `http://${window.location.host}`;
+        let currentTaskId = null;
+        let selectedDocType = null;  // 当前选择的文档类型
+        let selectedTemplateFile = null;  // 用户选择的模板文件
+        let isTaskRunning = false;  // 任务是否正在执行
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const allowedExtensions = ['.docx', '.pdf', '.md', '.doc'];
+            const fileName = file.name;
+            const ext = '.' + fileName.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(ext)) {
+                showToast('仅支持 .docx、.pdf、.md、.doc 格式的模板文件', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('模板文件大小不能超过 5MB', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            selectedTemplateFile = file;
+            showToast(`📄 已选择模板: ${fileName}`, 'info');
+            addMessage(`📄 <strong>模板已选择：</strong>${fileName}<br>文件将在创建任务时自动上传并应用。`, false);
+        }
+
+        // 移除已选模板
+        function removeTemplate(showNotification = false) {
+            selectedTemplateFile = null;
+            document.getElementById('templateInput').value = '';
+            if (showNotification) {
+                showToast('模板已移除', 'info');
+            }
+        }
+
+        // Dashboard node data storage
+        let dashboardNodes = {};
+        let dashboardLogLines = [];
+        
+        // Toast提示
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 12px 24px;
+                background: ${type === 'error' ? '#f44336' : '#5c9ece'};
+                color: white;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // 检查API连接
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    document.getElementById('status').textContent = '🟢 已连接';
+                    return true;
+                } else {
+                    document.getElementById('status').textContent = '🔴 未连接';
+                }
+            } catch (e) {
+                console.error('Connection check failed:', e);
+                document.getElementById('status').textContent = '🔴 未连接';
+            }
+            return false;
+        }
+        
+        // 立即执行连接检查
+        console.log('Initializing AutoResearch...');
+        checkConnection().then(() => console.log('Connection check done'));
+        setInterval(checkConnection, 30000);
+        
+        // 页面加载时恢复任务状态
+        async function restoreTaskState() {
+            try {
+                const savedTaskId = localStorage.getItem('autoresearch_task_id');
+                const savedDocType = localStorage.getItem('autoresearch_doc_type');
+                const savedTopic = localStorage.getItem('autoresearch_topic');
+                const savedUiState = localStorage.getItem('autoresearch_ui_state');
+                
+                if (savedTaskId && savedDocType) {
+                    const response = await fetch(`${API_BASE}/api/research/${savedTaskId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const status = data.status;
+                        
+                        if (status === 'RUNNING' || status === 'PENDING') {
+                            currentTaskId = savedTaskId;
+                            selectedDocType = savedDocType;
+
+                            // 禁用按钮，因为任务正在进行
+                            isTaskRunning = true;
+                            updateSuggestionButtonsState();
+                            updateNewTaskButtonState();
+
+                            document.querySelectorAll('.suggestion').forEach(el => {
+                                if ((savedDocType === 'PAPER' && el.textContent.includes('学术论文')) ||
+                                    (savedDocType === 'PATENT' && el.textContent.includes('专利申请'))) {
+                                    el.classList.add('selected');
+                                }
+                            });
+
+                            const input = document.getElementById('messageInput');
+                            input.placeholder = `请输入${savedDocType === 'PAPER' ? '学术论文' : '专利申请'}主题...`;
+                            input.disabled = true;
+
+                            const sendBtn = document.getElementById('sendBtn');
+                            sendBtn.classList.add('cancelling');
+
+                            addMessage(`📋 正在恢复任务: ${savedTopic || '未知主题'}`, false);
+                            
+                            if (savedUiState) {
+                                try {
+                                    const uiState = JSON.parse(savedUiState);
+                                    dashboardNodes = uiState.dashboardNodes || {};
+                                    dashboardLogLines = uiState.dashboardLogLines || [];
+                                    
+                                    showProgress(uiState.steps || [], uiState.currentNode, uiState.nodeDetails);
+                                    
+                                    const dashboardContent = document.getElementById('dashboardContent');
+                                    if (dashboardContent && dashboardNodes && Object.keys(dashboardNodes).length > 0) {
+                                        renderDashboard();
+                                    }
+                                    
+                                    updateDashboardLog();
+                                } catch (e) {
+                                    console.error('Failed to parse UI state:', e);
+                                }
+                            }
+                            
+                            monitorProgress();
+                        } else if (status === 'COMPLETED') {
+                            localStorage.removeItem('autoresearch_task_id');
+                            localStorage.removeItem('autoresearch_doc_type');
+                            localStorage.removeItem('autoresearch_topic');
+                            localStorage.removeItem('autoresearch_ui_state');
+                        } else {
+                            localStorage.removeItem('autoresearch_task_id');
+                            localStorage.removeItem('autoresearch_doc_type');
+                            localStorage.removeItem('autoresearch_topic');
+                            localStorage.removeItem('autoresearch_ui_state');
+                            // 显示初始工作流步骤
+                            resetDashboard();
+                        }
+                    } else {
+                        localStorage.removeItem('autoresearch_task_id');
+                        localStorage.removeItem('autoresearch_doc_type');
+                        localStorage.removeItem('autoresearch_topic');
+                        localStorage.removeItem('autoresearch_ui_state');
+                        resetDashboard();
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to restore task state:', e);
+                // 出错时也显示初始工作流
+                resetDashboard();
+            }
+        }
+
+        // 没有保存的任务时，显示初始工作流步骤
+        resetDashboard();
+        
+        function saveUiState() {
+            try {
+                const dashboardContent = document.getElementById('dashboardContent');
+                if (!dashboardContent) return;
+                
+                const uiState = {
+                    dashboardNodes: dashboardNodes,
+                    dashboardLogLines: dashboardLogLines,
+                    steps: Array.from(document.querySelectorAll('.workflow-node')).map((node, i) => {
+                        const label = node.querySelector('.workflow-node-label');
+                        const circle = node.querySelector('.workflow-node-circle');
+                        return {
+                            name: label ? label.textContent : '',
+                            nodeKey: node.dataset.nodeKey || '',
+                            status: node.classList.contains('active') ? 'active' : 
+                                    node.classList.contains('completed') ? 'completed' : ''
+                        };
+                    }),
+                    nodeDetails: Array.from(document.querySelectorAll('.detail-line .detail-text')).map(el => el.textContent),
+                    currentNode: document.querySelector('.workflow-node.active')?.dataset?.nodeKey || 
+                                 document.querySelector('.workflow-node.active .workflow-node-label')?.textContent
+                };
+                
+                localStorage.setItem('autoresearch_ui_state', JSON.stringify(uiState));
+            } catch (e) {
+                console.error('Failed to save UI state:', e);
+            }
+        }
+        
+        window.addEventListener('load', restoreTaskState);
+        
+        function addMessage(content, isUser = false) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            messageDiv.innerHTML = `
+                <div class="avatar">${isUser ? '👤' : '🥷'}</div>
+                <div class="message-content">${content}</div>
+            `;
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function showTyping() {
+            const chatArea = document.getElementById('chatArea');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="avatar">🥷</div>
+                <div class="typing">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            chatArea.appendChild(typingDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+        
+        function showProgress(steps, currentNode = null, nodeDetails = []) {
+            const chatArea = document.getElementById('chatArea');
+            
+            // Remove old progress area
+            const oldProgress = document.querySelector('.progress-area');
+            if (oldProgress) oldProgress.remove();
+            
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'progress-area';
+            progressDiv.id = 'progressArea';
+            
+            // Node icons mapping
+            const nodeIcons = {
+                'intent_analysis': '🎯',
+                'feasibility_study': '📋',
+                'deep_research': '🔍',
+                'drafting': '✍️',
+                'logic_validation': '✅',
+                'plagiarism_check': '📝',
+                'polishing': '✨',
+                'publishing': '🚀'
+            };
+            
+            // Build visual workflow
+            let workflowHtml = '<div class="workflow-container">';
+            steps.forEach((s, i) => {
+                const nodeKey = s.nodeKey || Object.keys(nodeIcons)[i];
+                const icon = nodeIcons[nodeKey] || '📄';
+                
+                // Connector line
+                if (i > 0) {
+                    const prevIndex = i - 1;
+                    const prevStatus = steps[prevIndex].status;
+                    workflowHtml += `<div class="workflow-connector ${prevStatus === 'completed' ? 'completed' : ''}"></div>`;
+                }
+                
+                // Node
+                workflowHtml += `
+                    <div class="workflow-node ${s.status}" data-node-key="${nodeKey}">
+                        <div class="workflow-node-circle">${icon}</div>
+                        <div class="workflow-node-label">${s.name}</div>
+                    </div>
+                `;
+            });
+            workflowHtml += '</div>';
+            
+            // Node details section
+            let detailsHtml = '';
+            if (nodeDetails.length > 0) {
+                detailsHtml = '<div class="node-details">';
+                nodeDetails.forEach((detail, idx) => {
+                    detailsHtml += `<div class="detail-line" style="animation-delay: ${idx * 0.1}s">
+                        <span class="detail-icon">▸</span>
+                        <span class="detail-text">${detail}</span>
+                    </div>`;
+                });
+                detailsHtml += '</div>';
+            } else if (currentNode) {
+                // Show current node default message
+                detailsHtml = `<div class="node-details">
+                    <div class="detail-line">
+                        <span class="detail-icon">◉</span>
+                        <span class="detail-text">正在执行: ${currentNode}</span>
+                    </div>
+                    <div class="detail-line">
+                        <span class="detail-icon">○</span>
+                        <span class="detail-text">请稍候...</span>
+                    </div>
+                </div>`;
+            }
+            
+            progressDiv.innerHTML = `
+                <div class="progress-title">🔮 AI 研究工作流</div>
+                ${workflowHtml}
+                ${detailsHtml}
+            `;
+            chatArea.appendChild(progressDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+}
+        
+                function formatTimestamp() {
+                    const now = new Date();
+                    const y = now.getFullYear();
+                    const mo = String(now.getMonth() + 1).padStart(2, '0');
+                    const d = String(now.getDate()).padStart(2, '0');
+                    const h = String(now.getHours()).padStart(2, '0');
+                    const mi = String(now.getMinutes()).padStart(2, '0');
+                    const s = String(now.getSeconds()).padStart(2, '0');
+                    return `${y}-${mo}-${d} ${h}:${mi}:${s}`;
+                }
+                
+                // Add log line to dashboard (fills the container, newest at top)
+                function addDashboardLog(event, prefix = '') {
+                    const time = formatTimestamp();
+                    const node = event.node || '';
+                    const message = event.message || '';
+                    const detail = event.detail || '';
+                    
+                    let logText = `[${time}] [${node}] ${message}`;
+                    if (detail && detail !== message) {
+                        logText += '\n' + detail;
+                    }
+                    
+                    dashboardLogLines.unshift(logText);
+                    updateDashboardLog();
+                    saveUiState();
+                }
+                
+                // Update dashboard log display
+                function updateDashboardLog() {
+                    const logContainer = document.getElementById('dashboardLogContent');
+                    if (!logContainer) return;
+                    logContainer.innerHTML = dashboardLogLines.map(line => 
+                        `<div class="dashboard-log-line">${escapeHtml(line)}</div>`
+                    ).join('');
+                    logContainer.scrollTop = 0;
+                }
+                
+                function escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+                
+                // Update right-side dashboard panel - show current active node and SSE log
+                function updateDashboard(nodeKey, status, detail) {
+            const nodeNames = {
+                'intent_analysis': '意图分析',
+                'feasibility_study': '可行性研究',
+                'patent_feasibility': '可行性研究',
+                'paper_feasibility': '可行性研究',
+                'deep_research': '深度研究',
+                'patent_research': '深度研究',
+                'paper_research': '深度研究',
+                'drafting': '撰写初稿',
+                'patent_drafting': '撰写初稿',
+                'paper_drafting': '撰写初稿',
+                'logic_validation': '逻辑验证',
+                'patent_validation': '逻辑验证',
+                'paper_validation': '逻辑验证',
+                'plagiarism_check': '查重',
+                'polishing': '润色',
+                'publishing': '发布',
+                'patent_publishing': '发布',
+                'paper_publishing': '发布'
+            };
+            
+            const nodeIcons = {
+                'intent_analysis': '🎯',
+                'feasibility_study': '📋',
+                'patent_feasibility': '📋',
+                'paper_feasibility': '📋',
+                'deep_research': '🔍',
+                'patent_research': '🔍',
+                'paper_research': '🔍',
+                'drafting': '✍️',
+                'patent_drafting': '✍️',
+                'paper_drafting': '✍️',
+                'logic_validation': '✅',
+                'patent_validation': '✅',
+                'paper_validation': '✅',
+                'plagiarism_check': '📝',
+                'polishing': '✨',
+                'publishing': '🚀',
+                'patent_publishing': '🚀',
+                'paper_publishing': '🚀'
+            };
+            
+            // Map aliases to canonical nodeKey
+            const aliasMap = {
+                'patent_feasibility': 'feasibility_study',
+                'paper_feasibility': 'feasibility_study',
+                'patent_research': 'deep_research',
+                'paper_research': 'deep_research',
+                'patent_drafting': 'drafting',
+                'paper_drafting': 'drafting',
+                'patent_validation': 'logic_validation',
+                'paper_validation': 'logic_validation',
+                'patent_publishing': 'publishing',
+                'paper_publishing': 'publishing'
+            };
+            
+            const canonicalKey = aliasMap[nodeKey] || nodeKey;
+            
+            // Store node data under canonical key
+            if (!dashboardNodes[canonicalKey]) {
+                dashboardNodes[canonicalKey] = { 
+                    name: nodeNames[canonicalKey] || nodeNames[nodeKey] || nodeKey, 
+                    icon: nodeIcons[canonicalKey] || nodeIcons[nodeKey] || '📄',
+                    originalKey: nodeKey
+                };
+            }
+            dashboardNodes[canonicalKey].status = status;
+            if (detail !== null && detail !== undefined) {
+                dashboardNodes[canonicalKey].detail = detail;
+            }
+            
+            // Render dashboard - only show current active node
+            const dashboardContent = document.getElementById('dashboardContent');
+            if (!dashboardContent) return;
+            
+            // Find current active node (status = 'active')
+            let activeNodeKey = null;
+            let activeNode = null;
+            
+            const nodeOrder = ['intent_analysis', 'feasibility_study', 'deep_research', 'drafting', 'logic_validation', 'plagiarism_check', 'polishing', 'publishing'];
+            
+            // First, find the active node
+            for (const key of nodeOrder) {
+                const node = dashboardNodes[key];
+                if (node && node.status === 'active') {
+                    activeNodeKey = key;
+                    activeNode = node;
+                    break;
+                }
+            }
+            
+            // If no active node, check if task is completed
+            if (!activeNodeKey) {
+                // Check if publishing is completed
+                if (dashboardNodes['publishing'] && dashboardNodes['publishing'].status === 'completed') {
+                    activeNodeKey = 'publishing';
+                    activeNode = dashboardNodes['publishing'];
+                }
+            }
+            
+            if (!activeNode) {
+                dashboardContent.innerHTML = '<div class="dashboard-empty">开始研究任务后，<br>这里将实时显示当前节点的模型输出</div>';
+                return;
+            }
+            
+            // Build HTML for only the active node
+            const statusClass = activeNode.status || '';
+            // 只在右侧显示状态文字，不显示模型输出
+            const statusText = statusClass === 'active' ? '进行中' : (statusClass === 'completed' ? '已完成' : '等待中');
+            // 模型输出只在下方 body 中显示
+            const detailText = activeNode.detail || (statusClass === 'active' ? '正在处理...' : (statusClass === 'completed' ? '已完成' : '等待执行'));
+            
+            dashboardContent.innerHTML = `
+                <div class="dashboard-node ${statusClass}">
+                    <div class="dashboard-node-header">
+                        <div class="dashboard-node-icon">${activeNode.icon}</div>
+                        <div class="dashboard-node-title">${activeNode.name}</div>
+                        <div class="dashboard-node-status">${statusText}</div>
+                    </div>
+                    <div class="dashboard-node-body">${detailText}</div>
+                </div>
+                <div class="dashboard-log-section" style="flex: 1; min-height: 200px;">
+                    <div class="dashboard-log-header">📡 实时输出</div>
+                    <div class="dashboard-log-container" id="dashboardLogContent"></div>
+                </div>
+            `;
+            updateDashboardLog();
+            saveUiState();
+        }
+        
+        function resetDashboard() {
+            dashboardNodes = {};
+            dashboardLogLines = [];
+            // 显示初始工作流步骤
+            const stepDefs = [
+                { name: '意图分析', nodeKey: 'intent_analysis' },
+                { name: '可行性研究', nodeKey: 'feasibility_study' },
+                { name: '深度研究', nodeKey: 'deep_research' },
+                { name: '撰写初稿', nodeKey: 'drafting' },
+                { name: '逻辑验证', nodeKey: 'logic_validation', aliases: ['patent_validation', 'paper_validation'] },
+                { name: '查重', nodeKey: 'plagiarism_check' },
+                { name: '润色', nodeKey: 'polishing' },
+                { name: '发布', nodeKey: 'publishing', aliases: ['patent_publishing', 'paper_publishing'] }
+            ];
+            const steps = stepDefs.map(s => ({ ...s, status: '' }));
+            showProgress(steps);
+        }
+        
+        function renderDashboard() {
+            const dashboardContent = document.getElementById('dashboardContent');
+            if (!dashboardContent) return;
+            
+            let activeNodeKey = null;
+            let activeNode = null;
+            
+            const nodeOrder = ['intent_analysis', 'feasibility_study', 'deep_research', 'drafting', 'logic_validation', 'plagiarism_check', 'polishing', 'publishing'];
+            
+            for (const key of nodeOrder) {
+                const node = dashboardNodes[key];
+                if (node && node.status === 'active') {
+                    activeNodeKey = key;
+                    activeNode = node;
+                    break;
+                }
+            }
+            
+            if (!activeNodeKey) {
+                for (const key of nodeOrder) {
+                    const node = dashboardNodes[key];
+                    if (node && node.status === 'completed') {
+                        activeNodeKey = key;
+                        activeNode = node;
+                        break;
+                    }
+                }
+            }
+            
+            if (!activeNode) {
+                return;
+            }
+            
+            const statusClass = activeNode.status || '';
+            const statusText = statusClass === 'active' ? '进行中' : (statusClass === 'completed' ? '已完成' : '等待中');
+            const detailText = activeNode.detail || (statusClass === 'active' ? '正在处理...' : (statusClass === 'completed' ? '已完成' : '等待执行'));
+            const nodeNames = {
+                'intent_analysis': '意图分析', 'feasibility_study': '可行性研究', 'deep_research': '深度研究',
+                'drafting': '撰写初稿', 'logic_validation': '逻辑验证', 'plagiarism_check': '查重',
+                'polishing': '润色', 'publishing': '发布'
+            };
+            const nodeIcons = {
+                'intent_analysis': '🎯', 'feasibility_study': '📋', 'deep_research': '🔍',
+                'drafting': '✍️', 'logic_validation': '✅', 'plagiarism_check': '📝',
+                'polishing': '✨', 'publishing': '🚀'
+            };
+            
+            dashboardContent.innerHTML = `
+                <div class="dashboard-node ${statusClass}">
+                    <div class="dashboard-node-header">
+                        <div class="dashboard-node-icon">${nodeIcons[activeNodeKey] || '📄'}</div>
+                        <div class="dashboard-node-title">${nodeNames[activeNodeKey] || activeNodeKey}</div>
+                        <div class="dashboard-node-status">${statusText}</div>
+                    </div>
+                    <div class="dashboard-node-body">${detailText}</div>
+                </div>
+                <div class="dashboard-log-section" style="flex: 1; min-height: 200px;">
+                    <div class="dashboard-log-header">📡 实时输出</div>
+                    <div class="dashboard-log-container" id="dashboardLogContent"></div>
+                </div>
+            `;
+            updateDashboardLog();
+        }
+        
+        // 选择文档类型
+        function selectDocType(docType, presetMessage) {
+            // 如果任务正在进行中，禁用按钮
+            if (isTaskRunning) {
+                showToast('任务正在进行中，请等待完成或点击红点终止任务', 'warning');
+                return;
+            }
+
+            // 如果点击已选择的类型，则取消选择
+            if (selectedDocType === docType) {
+                selectedDocType = null;
+                document.getElementById('messageInput').placeholder = '输入你的研究需求...';
+                // 移除所有选中状态
+                document.querySelectorAll('.suggestion').forEach(el => el.classList.remove('selected'));
+                addMessage('已取消选择。请重新选择文档类型。', false);
+                return;
+            }
+
+            selectedDocType = docType;
+            const docTypeName = docType === 'PAPER' ? '学术论文' : '专利申请';
+
+            // 更新按钮选中状态
+            document.querySelectorAll('.suggestion').forEach(el => el.classList.remove('selected'));
+            const clickedBtn = event.target;
+            clickedBtn.classList.add('selected');
+
+            // 更新界面显示
+            const input = document.getElementById('messageInput');
+            input.placeholder = `请输入${docTypeName}主题...`;
+            input.focus();
+
+            // 显示提示消息
+            addMessage(`你已选择「${docTypeName}」，请输入具体的研究主题。`, false);
+        }
+
+        // 更新按钮禁用状态
+        function updateSuggestionButtonsState() {
+            const suggestions = document.querySelectorAll('.suggestion');
+            suggestions.forEach(el => {
+                if (isTaskRunning) {
+                    el.classList.add('disabled');
+                } else {
+                    el.classList.remove('disabled');
+                }
+            });
+        }
+
+        // 更新上传按钮禁用状态
+        function updateUploadButtonState() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const templateInput = document.getElementById('templateInput');
+            if (uploadBtn) {
+                uploadBtn.disabled = isTaskRunning;
+                if (isTaskRunning) {
+                    uploadBtn.style.opacity = '0.5';
+                    uploadBtn.style.cursor = 'not-allowed';
+                } else {
+                    uploadBtn.style.opacity = '1';
+                    uploadBtn.style.cursor = 'pointer';
+                }
+            }
+            if (templateInput) {
+                templateInput.disabled = isTaskRunning;
+            }
+        }
+
+        // Handle send button click - send or cancel task
+        async function handleSendClick() {
+            const sendBtn = document.getElementById('sendBtn');
+            const input = document.getElementById('messageInput');
+            
+            // If task is running, cancel it
+            if (currentTaskId && sendBtn.classList.contains('cancelling')) {
+                await cancelTask();
+                return;
+            }
+            
+            // Otherwise, send message
+            await sendMessage();
+        }
+        
+        // Cancel the running task
+        async function cancelTask() {
+            if (!currentTaskId) return;
+            
+            const sendBtn = document.getElementById('sendBtn');
+            const input = document.getElementById('messageInput');
+            
+            // Disable button during cancel request (keep SVG icons intact)
+            sendBtn.disabled = true;
+            
+             try {
+                 const response = await fetch(`${API_BASE}/api/research/${currentTaskId}`, {
+                     method: 'DELETE'
+                 });
+                 
+                 if (response.ok) {
+                     addMessage('❌ 任务已终止', false);
+                     
+// Clear polling interval
+                      clearInterval(window._pollInterval);
+
+                      // Reset UI state - restore send icon
+                      currentTaskId = null;
+                      sendBtn.classList.remove('cancelling');
+                      sendBtn.disabled = false;
+                      input.disabled = false;
+                      input.placeholder = '输入你的研究需求...';
+                      input.value = '';
+                      selectedDocType = null;
+                      document.querySelectorAll('.suggestion').forEach(el => el.classList.remove('selected'));
+
+                      // 标记任务结束，重新启用按钮
+                      isTaskRunning = false;
+                      updateSuggestionButtonsState();
+                      updateNewTaskButtonState();
+
+                      // Reset dashboard
+                     resetDashboard();
+                     
+// Reset workflow steps display - all nodes go back to empty state
+                      const stepDefs = [
+                          { name: '意图分析', nodeKey: 'intent_analysis' },
+                          { name: '可行性研究', nodeKey: 'feasibility_study' },
+                          { name: '深度研究', nodeKey: 'deep_research' },
+                          { name: '撰写初稿', nodeKey: 'drafting' },
+                          { name: '逻辑验证', nodeKey: 'logic_validation', aliases: ['patent_validation', 'paper_validation'] },
+                     { name: '查重', nodeKey: 'plagiarism_check' },
+                     { name: '润色', nodeKey: 'polishing' },
+                     { name: '发布', nodeKey: 'publishing', aliases: ['patent_publishing', 'paper_publishing'] }
+                      ];
+                      const steps = stepDefs.map(s => ({ ...s, status: '' }));
+                      showProgress(steps);
+                     
+                     // Clear any running intervals in monitorProgress
+                     if (window._pollInterval) {
+                         clearInterval(window._pollInterval);
+                     }
+                 }
+             } catch (e) {
+                 console.error('Cancel task error:', e);
+                 addMessage('❌ 终止任务失败：' + e.message, false);
+                 sendBtn.disabled = false;
+                 sendBtn.classList.remove('cancelling');
+             }
+        }
+        
+         // Reset UI state after task completes or fails
+         function resetUIAfterTask() {
+             const sendBtn = document.getElementById('sendBtn');
+             const input = document.getElementById('messageInput');
+
+             sendBtn.classList.remove('cancelling');
+             sendBtn.disabled = false;
+
+             input.disabled = false;
+             input.placeholder = '输入你的研究需求...';
+             input.value = '';
+
+             selectedDocType = null;
+             document.querySelectorAll('.suggestion').forEach(el => el.classList.remove('selected'));
+
+             localStorage.removeItem('autoresearch_task_id');
+             localStorage.removeItem('autoresearch_doc_type');
+             localStorage.removeItem('autoresearch_topic');
+             localStorage.removeItem('autoresearch_ui_state');
+
+// 标记任务结束，重新启用按钮
+              isTaskRunning = false;
+              updateSuggestionButtonsState();
+              updateNewTaskButtonState();
+         }
+
+         // 新建任务 - 重置页面到初始状态
+         function startNewTask() {
+             if (isTaskRunning) {
+                 showToast('任务正在进行中，请等待完成或点击红点终止任务', 'warning');
+                 return;
+             }
+
+             const input = document.getElementById('messageInput');
+             const sendBtn = document.getElementById('sendBtn');
+
+             // 重置输入框
+             input.disabled = false;
+             input.placeholder = '输入你的研究需求...';
+             input.value = '';
+
+             // 重置文档类型选择
+             selectedDocType = null;
+             document.querySelectorAll('.suggestion').forEach(el => el.classList.remove('selected'));
+
+             // 重置模板选择
+             selectedTemplateFile = null;
+             document.getElementById('templateInput').value = '';
+
+             // 重置发送按钮
+             sendBtn.classList.remove('cancelling');
+             sendBtn.disabled = false;
+
+             // 清空聊天记录
+             const chatArea = document.getElementById('chatArea');
+             if (chatArea) {
+                 chatArea.innerHTML = '';
+             }
+
+             // 添加欢迎消息
+             addMessage('请点击下方的「学术论文」或「专利申请」按钮开始您的研究任务。', false);
+
+             // 重置工作流看板
+             resetDashboard();
+
+             // 重置工作流步骤显示
+             const stepDefs = [
+                 { name: '意图分析', nodeKey: 'intent_analysis' },
+                 { name: '可行性研究', nodeKey: 'feasibility_study' },
+                 { name: '深度研究', nodeKey: 'deep_research' },
+                 { name: '撰写初稿', nodeKey: 'drafting' },
+                 { name: '逻辑验证', nodeKey: 'logic_validation', aliases: ['patent_validation', 'paper_validation'] },
+                 { name: '查重', nodeKey: 'plagiarism_check' },
+                 { name: '润色', nodeKey: 'polishing' },
+                 { name: '发布', nodeKey: 'publishing', aliases: ['patent_publishing', 'paper_publishing'] }
+             ];
+             const steps = stepDefs.map(s => ({ ...s, status: '' }));
+             showProgress(steps);
+
+             // 清除本地存储
+             localStorage.removeItem('autoresearch_task_id');
+             localStorage.removeItem('autoresearch_doc_type');
+             localStorage.removeItem('autoresearch_topic');
+             localStorage.removeItem('autoresearch_ui_state');
+
+             // 重置任务状态变量
+             currentTaskId = null;
+             isTaskRunning = false;
+
+             // 更新按钮状态
+             updateNewTaskButtonState();
+             updateSuggestionButtonsState();
+
+             showToast('已开启新会话', 'info');
+         }
+
+         // 更新新建任务按钮状态
+         function updateNewTaskButtonState() {
+             const newTaskBtn = document.getElementById('newTaskBtn');
+             if (newTaskBtn) {
+                 newTaskBtn.disabled = isTaskRunning;
+             }
+             updateUploadButtonState();
+         }
+
+         // 发送消息
+        async function sendMessage(msg) {
+            const input = document.getElementById('messageInput');
+            const message = msg || input.value.trim();
+            if (!message) return;
+
+            // 检查是否选择了文档类型
+            if (!selectedDocType) {
+                addMessage('请点击下方的「学术论文」或「专利申请」按钮选择文档类型后继续。', false);
+                return;
+            }
+
+            // 检查输入是否与文档撰写相关
+            if (!isDocumentRelated(message)) {
+                addMessage('请点击下方的文档类型后继续。', false);
+                return;
+            }
+
+            input.value = '';
+            addMessage(message, true);
+
+              // Disable input and change button to cancel mode (CSS handles icon swap)
+              input.disabled = true;
+              const sendBtn = document.getElementById('sendBtn');
+              sendBtn.classList.add('cancelling');
+
+            // 标记任务开始
+            isTaskRunning = true;
+            updateSuggestionButtonsState();
+            updateNewTaskButtonState();
+
+            // 创建研究任务（可能包含模板）
+            const domain = detectDomain(message);
+            await createResearchTask(message, selectedDocType, domain);
+        }
+        
+        // 检查消息是否与文档撰写相关
+        function isDocumentRelated(message) {
+            const lower = message.toLowerCase();
+            const keywords = [
+                '写', '写一篇', '撰写', '编写', '创建', '生成', '制作',
+                '论文', '专利', '学术', '研究', '报告', '提案', '摘要',
+                '主题', '关于', '分析', '探讨', '调查', '方法', '系统',
+                '算法', '模型', '应用', '技术', '研究', '设计', '实现'
+            ];
+            return keywords.some(kw => lower.includes(kw));
+        }
+        
+        // 检测领域
+        function detectDomain(message) {
+            const lower = message.toLowerCase();
+            if (lower.includes('医疗') || lower.includes('医学') || lower.includes('诊断') || lower.includes('生物')) {
+                return 'BIO';
+            } else if (lower.includes('金融') || lower.includes('经济') || lower.includes('银行')) {
+                return 'ECON';
+            } else if (lower.includes('物理')) {
+                return 'PHYS';
+            } else if (lower.includes('化学')) {
+                return 'CHEM';
+            } else if (lower.includes('遥感') || lower.includes('地理') || lower.includes('卫星')) {
+                return 'RS';
+            } else if (lower.includes('地理') || lower.includes('地质')) {
+                return 'GEO';
+            }
+            return 'CS';
+        }
+        
+        
+        
+        async function createResearchTask(topic, docType, domain) {
+            showTyping();
+
+            try {
+                let templateContent = null;
+
+                // 如果用户选择了模板文件，先上传获取内容
+                if (selectedTemplateFile) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', selectedTemplateFile);
+
+                        const uploadResponse = await fetch(`${API_BASE}/api/research/upload-template`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (uploadResponse.ok) {
+                            const uploadData = await uploadResponse.json();
+                            templateContent = uploadData.template_content;
+
+                            // 清空模板选择状态（不弹窗提示）
+                            removeTemplate(false);
+                        } else {
+                            showToast('模板上传失败，将继续使用默认模板', 'error');
+                        }
+                    } catch (e) {
+                        showToast('模板上传失败，将继续使用默认模板', 'error');
+                    }
+                }
+
+                const requestBody = {
+                    topic: topic,
+                    docType: docType,
+                    domain: domain
+                };
+
+                // 如果有模板内容，添加到请求中
+                if (templateContent) {
+                    requestBody.templateContent = templateContent;
+                }
+
+                const response = await fetch(`${API_BASE}/api/research`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                console.log('Task creation response:', response.status, JSON.stringify(data, null, 2));
+                console.log('Request body:', JSON.stringify(requestBody));
+
+                if (!response.ok || !data.taskId) {
+                    hideTyping();
+                    console.error('Task creation failed:', response.status, data);
+                    // Show detailed error from validation
+                    let errorMsg = '未知错误';
+                    if (data.detail && Array.isArray(data.detail)) {
+                        errorMsg = data.detail.map(e => `${e.loc?.join('.') || 'field'}: ${e.msg}`).join(', ');
+                    } else if (data.message) {
+                        errorMsg = data.message;
+                    } else if (data.detail) {
+                        errorMsg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+                    }
+                    addMessage(`❌ 创建任务失败：${errorMsg}<br>请确认服务器是否运行。`);
+                    const sendBtn = document.getElementById('sendBtn');
+                    const input = document.getElementById('messageInput');
+                    sendBtn.classList.remove('cancelling');
+                    sendBtn.disabled = false;
+                    input.disabled = false;
+                    input.placeholder = '输入你的研究需求...';
+                    currentTaskId = null;
+                    isTaskRunning = false;
+                    updateSuggestionButtonsState();
+                    updateNewTaskButtonState();
+                    return;
+                }
+
+                currentTaskId = data.taskId;
+                
+                localStorage.setItem('autoresearch_task_id', currentTaskId);
+                localStorage.setItem('autoresearch_doc_type', docType);
+                localStorage.setItem('autoresearch_topic', topic);
+                
+                // Reset dashboard when task is created
+                resetDashboard();
+
+                hideTyping();
+
+                let templateInfo = templateContent ? '<br><strong>模板：</strong>已应用自定义模板' : '';
+                addMessage(`✅ 任务已创建！<br>
+                    <strong>任务ID：</strong>${currentTaskId}<br>
+                    <strong>文档类型：</strong>${docType}<br>
+                    <strong>领域：</strong>${domain}${templateInfo}<br><br>
+                    正在开始研究工作流...`);
+                
+                // 开始监控进度
+                monitorProgress();
+                
+            } catch (e) {
+                hideTyping();
+                addMessage(`❌ 创建任务失败：${e.message}<br>请确认服务器是否运行。`);
+            }
+        }
+        
+        async function monitorProgress() {
+            // Step definitions with node keys for mapping
+            const stepDefs = [
+                { name: '意图分析', nodeKey: 'intent_analysis' },
+                { name: '可行性研究', nodeKey: 'feasibility_study', aliases: ['patent_feasibility', 'paper_feasibility'] },
+                { name: '深度研究', nodeKey: 'deep_research', aliases: ['patent_research', 'paper_research'] },
+                { name: '撰写初稿', nodeKey: 'drafting', aliases: ['patent_drafting', 'paper_drafting'] },
+                { name: '逻辑验证', nodeKey: 'logic_validation', aliases: ['patent_validation', 'paper_validation'] },
+                { name: '查重', nodeKey: 'plagiarism_check' },
+                { name: '润色', nodeKey: 'polishing' },
+                { name: '发布', nodeKey: 'publishing', aliases: ['patent_publishing', 'paper_publishing'] }
+            ];
+            
+            let steps = stepDefs.map(s => ({ ...s, status: '' }));
+            let nodeDetails = [];
+            let currentNodeIndex = -1;
+            
+            // Initialize progress display
+            showProgress(steps);
+            
+            // Try SSE connection first
+            let sseConnected = false;
+            try {
+                const sseResponse = await fetch(`${API_BASE}/api/research/${currentTaskId}/stream`);
+                if (sseResponse.ok) {
+                    const reader = sseResponse.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    
+                    // Start polling fallback simultaneously
+                    window._pollInterval = setInterval(async () => {
+                        if (!currentTaskId) {
+                            clearInterval(window._pollInterval);
+                            return;
+                        }
+                        await checkTaskStatus();
+                    }, 3000);
+                    
+                    // SSE reader - 更健壮的解析
+                    const readSSE = async () => {
+                        while (true) {
+                            try {
+                                const { done, value } = await reader.read();
+                                if (done) break;
+                                
+                                buffer += decoder.decode(value, { stream: true });
+                                const lines = buffer.split('\n');
+                                buffer = lines.pop() || '';  // Keep incomplete line in buffer
+                                
+                                for (const line of lines) {
+                                    // Skip empty lines
+                                    if (!line || !line.trim()) continue;
+                                    
+                                    // Handle "data: " prefix
+                                    const dataPrefix = 'data: ';
+                                    if (line.startsWith(dataPrefix)) {
+                                        try {
+                                            const jsonStr = line.slice(dataPrefix.length).trim();
+                                            if (jsonStr) {  // Skip empty data
+                                                const event = JSON.parse(jsonStr);
+                                                handleSSEEvent(event);
+                                            }
+                                        } catch (e) {
+                                            console.error('SSE parse error:', e, 'line:', line);
+                                        }
+                                    }
+                                    // Skip other lines (comments, etc.)
+                                }
+                            } catch (e) {
+                                console.error('SSE stream error:', e);
+                                break;
+                            }
+                        }
+                    };
+                    
+                    readSSE().catch(e => {
+                        console.log('SSE connection closed');
+                        if (window._pollInterval) {
+                            clearInterval(window._pollInterval);
+                        }
+                    });
+                    sseConnected = true;
+                }
+            } catch (e) {
+                console.log('SSE not available, using polling');
+            }
+            
+            // If SSE not connected, use polling - 更频繁的轮询
+            if (!sseConnected) {
+                window._pollInterval = setInterval(async () => {
+                    if (!currentTaskId) {
+                        clearInterval(window._pollInterval);
+                        return;
+                    }
+                    await checkTaskStatus();
+                }, 1500);  // 缩短到1.5秒
+            }
+            
+            async function checkTaskStatus() {
+                try {
+                    const response = await fetch(`${API_BASE}/api/research/${currentTaskId}`);
+                    const data = await response.json();
+                    handleTaskUpdate(data);
+                } catch (e) {
+                    console.error('Monitor error:', e);
+                }
+            }
+            
+             function handleSSEEvent(event) {
+                 console.log('SSE Event:', event);
+                 
+                 if (event.event === 'connected') {
+                     // Reset dashboard when connected
+                     resetDashboard();
+                     addMessage('🔗 已连接到实时进度更新', false);
+                     return;
+                 }
+                 
+                 if (event.event === 'task_complete') {
+                     clearInterval(window._pollInterval);
+                     // Update publishing node to completed in dashboard - 直接显示输出路径，不做处理
+                     updateDashboard('publishing', 'completed', event.output_path || 'workspace/output');
+                     // Update the left workflow display
+                     const publishIndex = stepDefs.findIndex(s => s.nodeKey === 'publishing');
+                     if (publishIndex !== -1) {
+                         // Mark all nodes (including previous ones) as completed
+                         for (let i = 0; i <= publishIndex; i++) {
+                             if (steps[i].status !== 'completed') {
+                                 steps[i].status = 'completed';
+                                 updateDashboard(stepDefs[i].nodeKey, 'completed');
+                             }
+                         }
+                         showProgress(steps, 'publishing', nodeDetails);
+                     }
+                     addMessage(`🎉 任务完成！你的研究文档已经生成。<br><br>
+                         <strong>📁 保存路径：</strong>${event.output_path || 'workspace/output'}<br><br>
+                         <small>提示：你可以在设置中修改默认保存路径</small>`);
+                     // Reset UI state after task completes
+                     resetUIAfterTask();
+                     currentTaskId = null;
+                     return;
+                 }
+                 
+                 if (event.event === 'task_failed') {
+                     clearInterval(window._pollInterval);
+                     addMessage('❌ 任务失败：' + (event.message || '未知错误'));
+                     // Reset UI state after task fails
+                     resetUIAfterTask();
+                     currentTaskId = null;
+                     return;
+                 }
+                 
+                 if (event.event === 'task_stopped') {
+                     clearInterval(window._pollInterval);
+                     const reason = event.reason || event.message || '任务已停止';
+                     addMessage('⛔ ' + reason);
+                     addDashboardLog({event: 'task_stopped', node: event.node || 'workflow', message: reason});
+                     resetUIAfterTask();
+                     currentTaskId = null;
+                     return;
+                 }
+                 
+                 // Node events
+                 if (event.node && event.message) {
+                     console.log('SSE Event received:', event);
+                     
+                     const nodeIndex = stepDefs.findIndex(s => 
+                         s.nodeKey === event.node || (s.aliases && s.aliases.includes(event.node))
+                     );
+                     if (nodeIndex !== -1) {
+                         // Mark previous nodes as completed
+                         for (let i = 0; i < nodeIndex; i++) {
+                             if (steps[i].status !== 'completed') {
+                                 steps[i].status = 'completed';
+                                 // Update dashboard for completed nodes
+                                 updateDashboard(stepDefs[i].nodeKey, 'completed');
+                             }
+                         }
+                         
+                         // Handle node_start vs node_complete events
+if (event.event === 'node_start') {
+                             // Mark current node as active
+                             steps[nodeIndex].status = 'active';
+                             currentNodeIndex = nodeIndex;
+                             
+                             let detailToShow = event.message;
+                             if (event.detail) {
+                                 detailToShow = event.detail;
+                             }
+                             
+                             const detailTime = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                             nodeDetails.unshift(`[${detailTime}] ${event.message}`);
+                             if (nodeDetails.length > 4) nodeDetails.pop();
+                             
+                             showProgress(steps, event.node, nodeDetails);
+                             saveUiState();
+                             
+                             updateDashboard(event.node, 'active', detailToShow);
+                             addDashboardLog(event);
+                         } else if (event.event === 'node_complete') {
+                             // Mark current node as completed
+                             steps[nodeIndex].status = 'completed';
+                             
+                             // Determine the detail to show
+                             let detailToShow = event.message;
+                             if (event.detail) {
+                                 detailToShow = event.detail;
+                             }
+                             
+                             // Add detail
+                             const detailTime = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                             nodeDetails.unshift(`[${detailTime}] ${event.message}`);
+                             if (nodeDetails.length > 4) nodeDetails.pop();
+                             
+// Update dashboard with completed status
+                             updateDashboard(event.node, 'completed', detailToShow);
+                             addDashboardLog(event);
+                             
+                             // Find the NEXT uncompleted node and mark it as active
+                             let nextActiveIndex = -1;
+                             for (let i = nodeIndex + 1; i < steps.length; i++) {
+                                 if (steps[i].status !== 'completed') {
+                                     nextActiveIndex = i;
+                                     break;
+                                 }
+                             }
+                             
+                             // Update left-side workflow display immediately
+                             if (nextActiveIndex !== -1) {
+                                 // Mark next node as active
+                                 steps[nextActiveIndex].status = 'active';
+                                 currentNodeIndex = nextActiveIndex;
+                                 
+                                 // Get the next node's info
+                                 const nextNodeKey = steps[nextActiveIndex].nodeKey;
+                                 const nextNodeName = steps[nextActiveIndex].name;
+                                 const nextNodeDetail = getNodeDetailMessage(nextNodeKey);
+                                 
+                                 // Add detail for next node
+                                 const nextDetailTime = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                 nodeDetails.unshift(`[${nextDetailTime}] 正在执行: ${nextNodeName}`);
+                                 if (nodeDetails.length > 4) nodeDetails.pop();
+                                 
+                                 // Update left side workflow with next node as active
+                                 showProgress(steps, nextNodeKey, nodeDetails);
+                                 saveUiState();
+                                 
+                                 // Update right side dashboard with next node as active
+                                 updateDashboard(nextNodeKey, 'active', nextNodeDetail);
+                                 addDashboardLog({event: 'node_start', node: nextNodeKey, message: `开始执行: ${nextNodeName}`, detail: nextNodeDetail});
+                             } else {
+                                 // No more nodes, all completed
+                                 showProgress(steps, event.node, nodeDetails);
+                                 saveUiState();
+                             }
+                         }
+                     }
+                 }
+             }
+            
+            function handleTaskUpdate(data) {
+                const status = data.status;
+                const node = data.currentNode;
+                
+                if (status === 'COMPLETED') {
+                    clearInterval(window._pollInterval);
+                    // Update publishing node to completed in dashboard - 直接显示输出路径，不做处理
+                    updateDashboard('publishing', 'completed', data.output_path || 'workspace/output');
+                    // Update the left workflow display
+                    const publishIndex = stepDefs.findIndex(s => s.nodeKey === 'publishing');
+                    if (publishIndex !== -1) {
+                        // Mark all nodes (including previous ones) as completed
+                        for (let i = 0; i <= publishIndex; i++) {
+                            if (steps[i].status !== 'completed') {
+                                steps[i].status = 'completed';
+                                updateDashboard(stepDefs[i].nodeKey, 'completed');
+                            }
+                        }
+                        steps[publishIndex].status = 'completed';
+                        showProgress(steps, 'publishing', nodeDetails);
+                    }
+                    addMessage(`🎉 任务完成！你的研究文档已经生成。<br><br>
+                        <strong>📁 保存路径：</strong>${data.output_path || 'workspace/output'}<br><br>
+                        <small>提示：你可以在设置中修改默认保存路径</small>`);
+                    // Reset UI state after task completes
+                    resetUIAfterTask();
+                    currentTaskId = null;
+                    return;
+                }
+                
+                if (status === 'FAILED') {
+                    clearInterval(window._pollInterval);
+                    addMessage('❌ 任务失败：' + (data.error_message || '未知错误'));
+                    // Reset UI state after task fails
+                    resetUIAfterTask();
+                    currentTaskId = null;
+                    return;
+                }
+                
+                // Update based on current node
+                const nodeMap = {
+                    'intent_analysis': 0,
+                    'feasibility_study': 1,
+                    'deep_research': 2,
+                    'drafting': 3,
+                    'logic_validation': 4,
+                    'plagiarism_check': 5,
+                    'polishing': 6,
+                    'publishing': 7
+                };
+                
+                const newIndex = nodeMap[node] ?? -1;
+                
+                // Update steps
+                if (newIndex !== -1) {
+                    // Debug: log the API response
+                    console.log('handleTaskUpdate - API response:', JSON.stringify(data));
+                    console.log('nodeDetail from API:', data.nodeDetail);
+                    
+                    // Mark previous as completed
+                    for (let i = 0; i < newIndex; i++) {
+                        if (steps[i].status !== 'completed') {
+                            steps[i].status = 'completed';
+                            // Update dashboard for completed nodes
+                            updateDashboard(stepDefs[i].nodeKey, 'completed');
+                        }
+                    }
+                    // Mark current as active
+                    if (steps[newIndex].status !== 'active') {
+                        steps[newIndex].status = 'active';
+                        
+                        // Get node detail from API response or use default message
+                        const nodeDetail = data.nodeDetail || getNodeDetailMessage(node);
+                        console.log('Using nodeDetail:', nodeDetail);
+                        
+                        // Add detail
+                        const detailTime = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        nodeDetails.unshift(`[${detailTime}] ${nodeDetail}`);
+                        if (nodeDetails.length > 4) nodeDetails.pop();
+                        
+                        // Update dashboard with current node (use API nodeDetail if available)
+                        updateDashboard(node, 'active', nodeDetail);
+                    }
+                    currentNodeIndex = newIndex;
+                }
+                
+                if (status === 'RUNNING' || status === 'PENDING') {
+                    showProgress(steps, node, nodeDetails);
+                }
+            }
+            
+            function getNodeDetailMessage(node) {
+                const messages = {
+                    'intent_analysis': '正在分析研究意图和主题...',
+                    'feasibility_study': '正在评估研究可行性...',
+                    'deep_research': '正在深度研究相关文献...',
+                    'drafting': '正在撰写研究文档初稿...',
+                    'logic_validation': '正在进行逻辑验证...',
+                    'plagiarism_check': '正在进行查重检测...',
+                    'polishing': '正在优化文档内容和格式...',
+                    'publishing': '正在保存和发布文档...'
+                };
+                return messages[node] || '正在处理...';
+            }
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Settings functions
+        async function showSettings() {
+            console.log('showSettings called');
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('active');
+            
+            // Load current settings
+            await loadSettings();
+            
+            // 使用保存的配置加载模型列表（不重新选择，保持当前选中状态）
+            await loadModels();
+            
+            // 恢复连接状态（如果之前有保存的连接状态）
+            const cachedSettings = localStorage.getItem('autoresearch_settings');
+            const statusEl = document.getElementById('connectionStatus');
+            if (cachedSettings) {
+                try {
+                    const settings = JSON.parse(cachedSettings);
+                    if (settings.connectionStatus) {
+                        statusEl.className = 'status-indicator ' + settings.connectionStatus;
+                        statusEl.title = settings.connectionTitle || '';
+                    } else {
+                        // Reset connection status
+                        statusEl.className = 'status-indicator';
+                        statusEl.title = '';
+                    }
+                } catch (e) {
+                    // Reset connection status
+                    statusEl.className = 'status-indicator';
+                    statusEl.title = '';
+                }
+            } else {
+                // Reset connection status
+                statusEl.className = 'status-indicator';
+                statusEl.title = '';
+            }
+        }
+        
+        let modelsLoaded = false;
+        
+        async function loadModels() {
+            // 如果已经加载过，不再重复加载（避免覆盖用户选择）
+            if (modelsLoaded) {
+                return;
+            }
+            
+            const modelSelect = document.getElementById('modelName');
+            
+            // 显示加载状态
+            modelSelect.innerHTML = '<option value="">加载中...</option>';
+            
+            // 获取当前输入的配置（优先使用用户当前输入的值）
+            const baseUrl = document.getElementById('modelBaseUrl').value;
+            const apiKey = document.getElementById('modelApiKey').value;
+            
+            try {
+                // 构建 URL 参数
+                let url = `${API_BASE}/api/settings/models`;
+                if (baseUrl && apiKey) {
+                    url += `?base_url=${encodeURIComponent(baseUrl)}&api_key=${encodeURIComponent(apiKey)}`;
+                }
+                
+                console.log('Loading models from:', url);
+                
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // 保存当前选中的值（如果有）
+                    let selectedValue = modelSelect.value;
+                    
+                    // 如果当前没有选中，检查是否有保存的模型
+                    if (!selectedValue && window._savedModel) {
+                        selectedValue = window._savedModel;
+                    }
+                    
+                    // 清空并添加默认选项
+                    modelSelect.innerHTML = '<option value="">-- 选择模型 --</option>';
+                    
+                    // 添加模型列表
+                    if (data.models && data.models.length > 0) {
+                        console.log('Loaded', data.models.length, 'models');
+                        data.models.forEach(m => {
+                            const option = document.createElement('option');
+                            option.value = m.id;
+                            option.textContent = m.name || m.id;
+                            modelSelect.appendChild(option);
+                        });
+                    } else {
+                        console.log('No models returned');
+                    }
+                    
+                    // 如果之前已经选中了模型（或有保存的模型），恢复选中状态
+                    if (selectedValue && selectedValue !== '加载中...' && selectedValue !== '-- 选择模型 --') {
+                        modelSelect.value = selectedValue;
+                    }
+                    
+                    // 清除保存的模型（已应用）
+                    window._savedModel = null;
+                    
+                    modelsLoaded = true;
+                }
+            } catch (e) {
+                console.error('Failed to load models:', e);
+                modelSelect.innerHTML = '<option value="">加载失败</option>';
+            }
+        }
+        
+        // 刷新模型列表（用于手动刷新）
+        async function refreshModels() {
+            modelsLoaded = false;
+            await loadModels();
+        }
+        
+        function onModelSelectChange() {
+            const modelSelect = document.getElementById('modelName');
+            console.log('Model selected:', modelSelect.value);
+            
+            // 用户选择模型后清空连接状态
+            document.getElementById('connectionStatus').className = 'status-indicator';
+            // 清除保存的连接状态（因为模型已变）
+            const cachedSettings = localStorage.getItem('autoresearch_settings');
+            if (cachedSettings) {
+                try {
+                    const settings = JSON.parse(cachedSettings);
+                    delete settings.connectionStatus;
+                    delete settings.connectionTitle;
+                    localStorage.setItem('autoresearch_settings', JSON.stringify(settings));
+                } catch (e) {
+                    console.error('Failed to clear connection status:', e);
+                }
+            }
+        }
+        
+        function onApiSettingsChange() {
+            // 清空连接状态
+            document.getElementById('connectionStatus').className = 'status-indicator';
+            // 清除保存的连接状态（因为配置已变）
+            const cachedSettings = localStorage.getItem('autoresearch_settings');
+            if (cachedSettings) {
+                try {
+                    const settings = JSON.parse(cachedSettings);
+                    delete settings.connectionStatus;
+                    delete settings.connectionTitle;
+                    localStorage.setItem('autoresearch_settings', JSON.stringify(settings));
+                } catch (e) {
+                    console.error('Failed to clear connection status:', e);
+                }
+            }
+        }
+        
+        // 用户点击模型下拉框时加载模型
+        function onModelDropdownClick() {
+            // 每次点击都尝试加载最新模型
+            loadModels();
+        }
+        
+        async function testConnection() {
+            const baseUrl = document.getElementById('modelBaseUrl').value;
+            const apiKey = document.getElementById('modelApiKey').value;
+            const model = document.getElementById('modelName').value;
+            const statusEl = document.getElementById('connectionStatus');
+            const testBtn = document.querySelector('.test-btn');
+            
+            if (!baseUrl) {
+                alert('请输入 API Base URL');
+                return;
+            }
+            
+            if (!apiKey) {
+                alert('请输入 API Key');
+                return;
+            }
+            
+            if (!model) {
+                alert('请选择模型');
+                return;
+            }
+            
+            // 显示测试中状态
+            testBtn.disabled = true;
+            testBtn.textContent = '测试中...';
+            statusEl.className = 'status-indicator';
+            statusEl.title = '正在测试...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/settings/model/test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        base_url: baseUrl,
+                        api_key: apiKey,
+                        model: model
+                    })
+                });
+                
+                const data = await response.json();
+                
+                let connectionStatus = 'error';
+                let connectionTitle = '连接失败';
+                
+                if (data.status === 'success') {
+                    statusEl.className = 'status-indicator success';
+                    connectionStatus = 'success';
+                    connectionTitle = `连接正常 (延迟: ${data.latency_ms}ms)`;
+                    statusEl.title = connectionTitle;
+                } else if (data.status === 'warning') {
+                    statusEl.className = 'status-indicator warning';
+                    connectionStatus = 'warning';
+                    connectionTitle = `延迟较高: ${data.latency_ms}ms`;
+                    statusEl.title = connectionTitle;
+                } else {
+                    statusEl.className = 'status-indicator error';
+                    connectionTitle = data.message || '连接失败';
+                    statusEl.title = connectionTitle;
+                }
+                
+                // 保存连接状态到 localStorage
+                const cachedSettings = localStorage.getItem('autoresearch_settings');
+                if (cachedSettings) {
+                    try {
+                        const settings = JSON.parse(cachedSettings);
+                        settings.connectionStatus = connectionStatus;
+                        settings.connectionTitle = connectionTitle;
+                        localStorage.setItem('autoresearch_settings', JSON.stringify(settings));
+                    } catch (e) {
+                        console.error('Failed to save connection status:', e);
+                    }
+                }
+                
+                // 显示结果消息
+                const message = data.message + (data.latency_ms ? ` (${data.latency_ms}ms)` : '');
+                alert(`测试结果: ${message}`);
+                
+            } catch (e) {
+                statusEl.className = 'status-indicator error';
+                statusEl.title = '测试失败: ' + e.message;
+                alert('测试失败: ' + e.message);
+                
+                // 保存连接失败状态到 localStorage
+                const cachedSettings = localStorage.getItem('autoresearch_settings');
+                if (cachedSettings) {
+                    try {
+                        const settings = JSON.parse(cachedSettings);
+                        settings.connectionStatus = 'error';
+                        settings.connectionTitle = '测试失败: ' + e.message;
+                        localStorage.setItem('autoresearch_settings', JSON.stringify(settings));
+                    } catch (err) {
+                        console.error('Failed to save connection status:', err);
+                    }
+                }
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '🔌 测试连接';
+            }
+        }
+        
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.remove('active');
+        }
+        
+        async function loadSettings() {
+            // 首先从 localStorage 加载缓存的设置
+            const cachedSettings = localStorage.getItem('autoresearch_settings');
+            if (cachedSettings) {
+                try {
+                    const settings = JSON.parse(cachedSettings);
+                    document.getElementById('outputPath').value = settings.outputPath || 'workspace/output';
+                    document.getElementById('modelBaseUrl').value = settings.baseUrl || '';
+                    // 保存选中的模型，loadModels后应用
+                    window._savedModel = settings.model || '';
+                    // 保存 API Key 供后续使用
+                    window._savedApiKey = settings.apiKey || '';
+                    // 如果有 API Key，显示实际值（只对本地存储的 key）
+                    if (settings.apiKey) {
+                        document.getElementById('modelApiKey').value = settings.apiKey;
+                    } else {
+                        document.getElementById('modelApiKey').placeholder = '请输入API Key';
+                    }
+                    console.log('Loaded settings from localStorage:', settings);
+                    // 返回继续执行 loadModels
+                } catch (e) {
+                    console.error('Failed to parse cached settings:', e);
+                }
+            }
+            
+            // 如果没有缓存，从后端加载
+            try {
+                const response = await fetch(`${API_BASE}/api/settings/config`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Workspace settings
+                    if (data.workspace) {
+                        document.getElementById('outputPath').value = data.workspace.output_path || 'workspace/output';
+                    }
+                    
+                    // Model settings
+                    if (data.model) {
+                        document.getElementById('modelBaseUrl').value = data.model.base_url || '';
+                        window._savedModel = data.model.model || '';
+                        // 后端返回的是 masked key，不要使用它
+                        // 只使用 localStorage 中的实际 key（如果存在）
+                        // window._savedApiKey 已经在 localStorage 加载时设置了
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load settings:', e);
+            }
+        }
+        
+        async function saveSettings() {
+            const outputPath = document.getElementById('outputPath').value;
+            const baseUrl = document.getElementById('modelBaseUrl').value;
+            const apiKey = document.getElementById('modelApiKey').value;
+            const modelName = document.getElementById('modelName').value;
+            
+            // 保留之前保存的 API Key 和连接状态
+            const cachedSettings = localStorage.getItem('autoresearch_settings');
+            let savedApiKey = '';
+            let connectionStatus = '';
+            let connectionTitle = '';
+            
+            if (cachedSettings) {
+                try {
+                    const settings = JSON.parse(cachedSettings);
+                    savedApiKey = settings.apiKey || '';
+                    connectionStatus = settings.connectionStatus || '';
+                    connectionTitle = settings.connectionTitle || '';
+                } catch (e) {
+                    console.error('Failed to parse cached settings:', e);
+                }
+            }
+            
+            // 如果用户没有输入新 API Key（输入框为空或仍是placeholder），保留之前保存的
+            // 只有当用户明确输入了新值时才更新
+            const inputValue = document.getElementById('modelApiKey').value;
+            // 优先使用 localStorage 的值，其次使用 _savedApiKey
+            const fallbackApiKey = savedApiKey || window._savedApiKey || '';
+            const finalApiKey = (inputValue && inputValue !== '已配置' && inputValue !== '请输入API Key') ? inputValue : fallbackApiKey;
+            
+            // 保存到 localStorage（浏览器缓存）
+            localStorage.setItem('autoresearch_settings', JSON.stringify({
+                outputPath: outputPath,
+                baseUrl: baseUrl,
+                apiKey: finalApiKey,
+                model: modelName,
+                connectionStatus: connectionStatus,
+                connectionTitle: connectionTitle
+            }));
+            console.log('Settings saved to localStorage');
+            
+            try {
+                // Save to backend .env file
+                await fetch(`${API_BASE}/api/settings/workspace`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ output_path: outputPath })
+                });
+                
+                await fetch(`${API_BASE}/api/settings/model`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        base_url: baseUrl,
+                        api_key: finalApiKey,
+                        model: modelName
+                    })
+                });
+                
+                alert('设置已保存！部分配置需要重启应用后生效。');
+                closeSettings();
+            } catch (e) {
+                alert('保存设置失败：' + e.message);
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSettings();
+            }
+        });
+    </script>
+</body>
+</html>

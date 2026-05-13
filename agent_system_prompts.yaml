@@ -1,0 +1,27 @@
+# Agent System Prompts Configuration
+# 用法: 设置 enabled: true 并填写 prompt 内容来覆盖默认prompt
+# 恢复默认: 设置 enabled: false 或删除整个agent配置块
+
+# ============ Editor Agent (主编) ============
+editor:
+  enabled: false
+  prompt: |
+    自定义editor prompt
+
+# ============ Investigator Agent (研究者) ============
+investigator:
+  enabled: false
+  prompt: |
+    自定义investigator prompt
+
+# ============ Writer Agent (写作者) ============
+writer:
+  enabled: false
+  prompt: |
+    自定义writer prompt
+
+# ============ Reviewer Agent (审稿者) ============
+reviewer:
+  enabled: false
+  prompt: |
+    自定义reviewer prompt

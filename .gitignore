@@ -60,11 +60,11 @@ workspace/output/*.md
 autoresearch.db
 *.log
 
-# OpenCode/session files (optional - may want to keep for continuity)
+# OpenCode/session files 
 .sisyphus/
 .opencode/
 
-# Spec files (optional - may want to keep for project documentation)
+# Spec files 
 .specify/
 specs/
 

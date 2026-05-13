@@ -75,3 +75,8 @@ prompt_code_review.md
 # others
 ToDo.md
 启动.md
+workspace/output/
+research-lazy/workspace/temp/
+
+# Runtime logs
+src/workflow_log.txt

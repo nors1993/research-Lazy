@@ -161,3 +161,14 @@ class SSEEvent(BaseModel):
     node: str | None = Field(None, description="Workflow node")
     message: str = Field(..., description="Event message")
     data: dict[str, Any] | None = Field(None, description="Additional event data")
+
+
+class ModelSettingsRequest(BaseModel):
+    base_url: str = Field(default="", description="API base URL")
+    api_key: str = Field(default="", description="API key")
+    model: str = Field(default="", description="Model name")
+
+
+class WorkspaceSettingsRequest(BaseModel):
+    output_path: str = Field(default="", description="Output directory path")
+    temp_path: str = Field(default="", description="Temp directory path")

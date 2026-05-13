@@ -5,6 +5,8 @@ from pathlib import Path
 import aiohttp
 from fastapi import APIRouter, Body
 
+from ..schemas import ModelSettingsRequest, WorkspaceSettingsRequest
+
 router = APIRouter()
 
 
@@ -61,15 +63,15 @@ async def get_workspace_settings():
 
 
 @router.post("/workspace")
-async def update_workspace_settings(output_path: str = "", temp_path: str = ""):
+async def update_workspace_settings(req: WorkspaceSettingsRequest):
     """Update workspace settings."""
     env_vars = read_env_file()
 
-    if output_path:
-        env_vars["WORKSPACE_OUTPUT_DIR"] = output_path
+    if req.output_path:
+        env_vars["WORKSPACE_OUTPUT_DIR"] = req.output_path
 
-    if temp_path:
-        env_vars["WORKSPACE_TEMP_DIR"] = temp_path
+    if req.temp_path:
+        env_vars["WORKSPACE_TEMP_DIR"] = req.temp_path
 
     write_env_file(env_vars)
 
@@ -96,18 +98,18 @@ async def get_model_settings():
 
 
 @router.post("/model")
-async def update_model_settings(base_url: str = "", api_key: str = "", model: str = ""):
+async def update_model_settings(req: ModelSettingsRequest):
     """Update model configuration."""
     env_vars = read_env_file()
 
-    if base_url:
-        env_vars["OPENAI_COMPATIBLE_BASE_URL"] = base_url
+    if req.base_url:
+        env_vars["OPENAI_COMPATIBLE_BASE_URL"] = req.base_url
 
-    if api_key:
-        env_vars["OPENAI_COMPATIBLE_API_KEY"] = api_key
+    if req.api_key:
+        env_vars["OPENAI_COMPATIBLE_API_KEY"] = req.api_key
 
-    if model:
-        env_vars["OPENAI_COMPATIBLE_MODEL"] = model
+    if req.model:
+        env_vars["OPENAI_COMPATIBLE_MODEL"] = req.model
 
     write_env_file(env_vars)
 
